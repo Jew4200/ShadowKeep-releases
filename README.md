@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/icon-256.png" width="128" height="128" alt="ShadowKeep icon">
+</p>
+
 # ShadowKeep
 
 Keeps **NVIDIA ShadowPlay** turned on. When any app, driver update, or screen
@@ -50,12 +54,18 @@ Because the target is always NVIDIA's own "what the user chose" value:
 
 It never reads, writes, or touches any other program. It only corrects NVIDIA's
 own setting, which is why it keeps working across driver updates and can't break
-anything.
+anything — no admin rights, no NVIDIA services restarted.
 
-**One honest limitation:** it's restore-*after*, not block-*before*. There's a
-sub-second window between something turning capture off and ShadowKeep turning
-it back on. For keeping your session recording that's fine; it is not a promise
-that zero frames are ever missed.
+**Honest limitations:**
+
+- It's restore-*after*, not block-*before*. There's a sub-second window between
+  something turning capture off and ShadowKeep turning it back on. For keeping
+  your session recording that's fine; it is not a promise that zero frames are
+  ever missed.
+- The registry is where ShadowPlay persists its state, so keeping it correct is
+  what guarantees the setting sticks and is picked up by NVIDIA's overlay (by its
+  next launch at the latest). If the live overlay ever lags a restore mid-session,
+  toggling ShadowPlay once in the NVIDIA App forces an immediate reload.
 
 ## Using it
 
