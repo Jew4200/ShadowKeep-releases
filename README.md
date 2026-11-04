@@ -22,7 +22,7 @@ no installer, no admin rights, nothing else to install.
 | **How** | Reads and corrects NVIDIA's own registry setting. **No injection, no hooking** of any other process |
 | **Install** | None. A single portable `ShadowKeep.exe` in the system tray |
 | **Platform** | Windows 11 / Windows 10 with an NVIDIA GPU and the NVIDIA App (or GeForce Experience) |
-| **Admin rights** | Not required. Runs as you, writes only your own per-user settings |
+| **Admin rights** | Not required for the default mode. Optional "re-enable live" mode restarts NVIDIA's service and needs admin |
 | **Telemetry** | None. It makes no network calls |
 | **Footprint** | One tray icon and a log file next to the exe |
 
@@ -54,18 +54,31 @@ Because the target is always NVIDIA's own "what the user chose" value:
 
 It never reads, writes, or touches any other program. It only corrects NVIDIA's
 own setting, which is why it keeps working across driver updates and can't break
-anything — no admin rights, no NVIDIA services restarted.
+anything.
+
+### Making a restore apply immediately (optional, needs admin)
+
+By default, a restore is guaranteed correct for NVIDIA's **next launch**, but the
+*running* overlay doesn't re-read the registry mid-session. Turn on **Re-enable
+live** in the tray menu and ShadowKeep will, after restoring the setting, restart
+NVIDIA's `NvContainerLocalSystem` service so the overlay re-reads it and rebuilds
+capture right away — the same reload NVIDIA's own troubleshooting uses. Verified
+end to end: after the restart, NVIDIA's capture log shows it re-arming with your
+real settings.
+
+This mode needs **administrator rights** (ShadowKeep offers to relaunch elevated),
+causes a **~2–3s overlay blip**, and is **debounced** (at most one restart per 20s)
+so nothing can make it ping-pong the service. It's **off by default**.
 
 **Honest limitations:**
 
-- It's restore-*after*, not block-*before*. There's a sub-second window between
+- It's restore-*after*, not block-*before*. There's a short window between
   something turning capture off and ShadowKeep turning it back on. For keeping
   your session recording that's fine; it is not a promise that zero frames are
   ever missed.
-- The registry is where ShadowPlay persists its state, so keeping it correct is
-  what guarantees the setting sticks and is picked up by NVIDIA's overlay (by its
-  next launch at the latest). If the live overlay ever lags a restore mid-session,
-  toggling ShadowPlay once in the NVIDIA App forces an immediate reload.
+- Without "Re-enable live," a restore is correct for NVIDIA's next launch but may
+  not re-arm the live overlay until NVIDIA restarts. With it on (admin), it
+  re-arms within seconds.
 
 ## Using it
 
@@ -75,6 +88,7 @@ expand the hidden-icons `^` arrow if you don't see it). Right-click for:
 - **Status** — current ShadowPlay state and whether ShadowKeep is enforcing.
 - **Keep ShadowPlay on (enforce)** — master switch. Uncheck to pause ShadowKeep.
 - **Start with Windows** — run at logon (per-user, no admin, no service).
+- **Re-enable live (restart NVIDIA service)** — the optional admin feature above.
 - **Show recent activity** — every restore, with the app that was in the
   foreground at the time.
 - **Exit**.
